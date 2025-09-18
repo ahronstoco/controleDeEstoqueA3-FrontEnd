@@ -1,9 +1,7 @@
-# 🧾 Sistema de Controle de Estoque
-<strong>Programação de Soluções Computacionais A3</strong>
+# 🖥️ Frontend - Sistema de Controle de Estoque - Em desenvolvimento! 
+**Disciplina: Sistemas Distribuídos e Mobile – A3**  
 
-
-Sistema desenvolvido para gerenciar o estoque de uma empresa, permitindo cadastrar produtos e categorias, controlar entradas e saídas, emitir alertas de estoque e gerar relatórios gerenciais.
-
+Este repositório contém a camada **frontend** do sistema de controle de estoque.  
 ---
 
 ## ✅ Requisitos Funcionais
@@ -55,10 +53,8 @@ O script SQL para criação da base de dados e tabelas está disponível neste r
 
 | Nome                          | Matrícula      | GitHub                     |
 |-------------------------------|----------------|----------------------------|
-| Adhriano Machado de Oliveira | 10725114655    | [adhrianom](https://github.com/adhrianom), feeh, adhrianom, 10725114655 |
-| Ahron Stoco Simões           | 10724261491    | [ahronstoco](https://github.com/ahronstoco), Ahron |
+| Ahron Stoco Simões           | 10724261491    | [ahronstoco](https://github.com/ahronstoco)|
 | Eduardo Souza Jeremias       | 10724262460    | [eduardosjeremias](https://github.com/eduardosjeremias) |
-| Gabriel Rodrigues Victurino  | 10725113959    | [gabriel-victurino](https://github.com/gabriel-victurino), gabri |
 
 ---
 
