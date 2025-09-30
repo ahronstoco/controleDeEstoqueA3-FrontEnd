@@ -1,4 +1,4 @@
-# 🖥️ Frontend - Sistema de Controle de Estoque - Em desenvolvimento! 
+# 🖥️ Front-end - Sistema de Controle de Estoque - Em desenvolvimento! 
 **Disciplina: Sistemas Distribuídos e Mobile – A3**  
 
 Este repositório contém a camada **frontend** do sistema de controle de estoque.  
