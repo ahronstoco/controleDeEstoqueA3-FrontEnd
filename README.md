@@ -1,8 +1,8 @@
-# 🖥️ Back-end - Sistema de Controle de Estoque.
+# 🖥️ Front-end - Sistema de Controle de Estoque.
 **Disciplina: Sistemas Distribuídos e Mobile – A3**
 
-Este repositório contém a camada **back-end** do sistema de controle de estoque.
-**Link para o front-end:** https://github.com/ahronstoco/controleDeEstoqueA3-FrontEnd
+Este repositório contém a camada **front-end** do sistema de controle de estoque.
+**Link para o front-end:** https://github.com/ahronstoco/controleDeEstoqueA3-BackEnd
 
 ---
 
