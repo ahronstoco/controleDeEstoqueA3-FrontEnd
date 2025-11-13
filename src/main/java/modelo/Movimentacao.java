@@ -1,8 +1,10 @@
 package modelo;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Movimentacao {
+public class Movimentacao implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private int idMovimentacao;
     private int idProduto;
