@@ -66,6 +66,24 @@ Este repositório contém a camada **front-end** do sistema de controle de estoq
 
 ---
 
+## 🎞️ Telas do sistema
+<details>
+  <summary><strong>Telas</strong></summary>
+  
+- [`Tela1.png`](Tela1.png)
+  
+- [`Tela2.png`](Tela2.png)
+
+- [`Tela3.png`](Tela3.png)
+
+- [`Tela4.png`](Tela4.png)
+
+- [`Tela5.png`](Tela5.png)
+
+</details>
+
+---
+
 ## 👨‍💻 Desenvolvedores do Projeto
 
 | Nome                          | Matrícula      | GitHub                     |
