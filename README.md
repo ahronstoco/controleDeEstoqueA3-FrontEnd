@@ -70,15 +70,15 @@ Este repositório contém a camada **front-end** do sistema de controle de estoq
 <details>
   <summary><strong>Telas</strong></summary>
   
-- [`Tela1.png`](Tela1.png)
+- [`tela1.png`](tela1.png)
   
-- [`Tela2.png`](Tela2.png)
+- [`tela2.png`](tela2.png)
 
-- [`Tela3.png`](Tela3.png)
+- [`tela3.png`](tela3.png)
 
-- [`Tela4.png`](Tela4.png)
+- [`tela4.png`](tela4.png)
 
-- [`Tela5.png`](Tela5.png)
+- [`tela5.png`](tela5.png)
 
 </details>
 
