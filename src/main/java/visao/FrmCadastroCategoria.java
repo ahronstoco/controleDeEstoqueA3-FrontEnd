@@ -1,25 +1,41 @@
 package visao;
 
+import modelo.Categoria;
+import modelo.Tamanho;
+import servico.ServicoCategoria;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import java.sql.SQLException;
-import dao.CategoriaDAO;
+import java.rmi.Naming;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import modelo.Categoria;
 import modelo.Tamanho;
 
 public class FrmCadastroCategoria extends javax.swing.JFrame {
-    
-    public FrmCadastroCategoria() throws SQLException {
-        initComponents();
-        setLocationRelativeTo(null);
-        this.categoria = new Categoria();
-        carregarCategorias();
+
+    private ServicoCategoria servicoCategoria;
+    private Categoria categoria = new Categoria();
+
+    public FrmCadastroCategoria() {
+        try {
+            initComponents();
+            setLocationRelativeTo(null);
+            conectarServico();
+            carregarCategorias();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                    "Erro ao iniciar formulário: " + e.getMessage());
+        }
     }
 
-    Categoria categoria = new Categoria();
-    CategoriaDAO dao = new CategoriaDAO();
+    private void conectarServico() throws Exception {
+        servicoCategoria = (ServicoCategoria) Naming.lookup(
+                "rmi://localhost:1099/CategoriaService"
+        );
+        System.out.println("Conectado ao serviço de Categoria via RMI.");
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -201,15 +217,17 @@ public class FrmCadastroCategoria extends javax.swing.JFrame {
                     .addComponent(JTFNome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(JBAdicionar, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(20, 20, 20)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(JCTamanho, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3)
-                    .addComponent(JBRemover, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(JBRemover, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(JCTamanho, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel3)))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(JTFEmbalagem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(JBFechar, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(JBFechar, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel4)
+                        .addComponent(JTFEmbalagem, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -240,12 +258,13 @@ public class FrmCadastroCategoria extends javax.swing.JFrame {
             Tamanho tamanho = null;
 
             if (this.JTFNome.getText().length() < 2) {
-                throw new Mensagem("O nome da categoria deve conter mais de 2 caractéres.");
+                throw new Mensagem("O nome da categoria deve conter mais de 2 caracteres.");
             } else {
                 nome = JTFNome.getText();
             }
+
             if (this.JTFEmbalagem.getText().length() < 2) {
-                throw new Mensagem("A embalagem deve conter mais de 2 caractéres.");
+                throw new Mensagem("A embalagem deve conter mais de 2 caracteres.");
             } else {
                 embalagem = JTFEmbalagem.getText();
             }
@@ -258,64 +277,62 @@ public class FrmCadastroCategoria extends javax.swing.JFrame {
             }
 
             categoria = new Categoria(nome, tamanho, embalagem);
-            try {
-                dao.inserir(categoria);
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(null, "Ocorreu um erro ao adicionar categoria." + e.getMessage());
-            }
-            int id = categoria.getIdCategoria();
 
-            // Adicionando as informações na table
+            int idGerado = servicoCategoria.salvarCategoria(categoria);
+
             DefaultTableModel model = (DefaultTableModel) JTCategoria.getModel();
-            model.addRow(new Object[]{id, nome, tamanho, embalagem});
+            model.addRow(new Object[]{idGerado, nome, tamanho, embalagem});
 
-            // Setando os valores iniciais.
             JTFNome.setText("");
             JTFEmbalagem.setText("");
-            JCTamanho.setSelectedItem(0);
+            JCTamanho.setSelectedIndex(0);
 
-            JOptionPane.showMessageDialog(null, "Categoria adicionada!");
+            JOptionPane.showMessageDialog(null, "Categoria adicionada.");
 
         } catch (Mensagem e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Erro ao adicionar categoria: " + e.getMessage());
         }
     }//GEN-LAST:event_JBAdicionarActionPerformed
 
     private void JBRemoverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBRemoverActionPerformed
-        // Selecionando as rows(linhas) da JTable;
-
         int selectedRow = JTCategoria.getSelectedRow();
 
-        // Caso o usuário não escolha uma linha para deletar.
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(null, "Selecione um linha para apagar.");
+            JOptionPane.showMessageDialog(null, "Selecione uma linha para apagar.");
             return;
         }
 
         DefaultTableModel model = (DefaultTableModel) JTCategoria.getModel();
         int idCategoria = Integer.parseInt(model.getValueAt(selectedRow, 0).toString());
 
-        dao.apagar(idCategoria);
+        try {
+            servicoCategoria.excluirCategoria(idCategoria);
 
-        // Removendo a linha
-        model.removeRow(selectedRow);
+            model.removeRow(selectedRow);
 
-        JOptionPane.showMessageDialog(null, "Categoria apagada.");
+            JOptionPane.showMessageDialog(null, "Categoria apagada.");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Erro ao remover categoria: " + e.getMessage());
+        }
     }//GEN-LAST:event_JBRemoverActionPerformed
 
     private void JTFEmbalagemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFEmbalagemActionPerformed
         // TODO add your handling code here:
-        
+
         JBAdicionar.doClick();
-        
+
     }//GEN-LAST:event_JTFEmbalagemActionPerformed
     private void carregarCategorias() {
         try {
             DefaultTableModel model = (DefaultTableModel) JTCategoria.getModel();
-            model.setRowCount(0); // Limpa a tabela antes de recarregar os dados
+            model.setRowCount(0);
 
-            for (Categoria cat : dao.listar()) {
+            List<Categoria> lista = servicoCategoria.listarCategorias();
+
+            for (Categoria cat : lista) {
                 model.addRow(new Object[]{
                     cat.getIdCategoria(),
                     cat.getNome(),
@@ -323,6 +340,7 @@ public class FrmCadastroCategoria extends javax.swing.JFrame {
                     cat.getEmbalagem()
                 });
             }
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Erro ao carregar categorias: " + e.getMessage());
         }

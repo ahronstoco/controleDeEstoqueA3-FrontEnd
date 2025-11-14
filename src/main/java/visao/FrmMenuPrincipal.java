@@ -1,5 +1,10 @@
 package visao;
 
+import java.rmi.Naming;
+import java.rmi.RemoteException;
+import servico.ServicoProduto;
+import servico.ServicoCategoria;
+import servico.ServicoMovimentacao;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -7,12 +12,28 @@ import javax.swing.JOptionPane;
 
 public class FrmMenuPrincipal extends javax.swing.JFrame {
 
+    private ServicoProduto servicoProduto;
+    private ServicoCategoria servicoCategoria;
+    private ServicoMovimentacao servicoMovimentacao;
+
     public FrmMenuPrincipal() {
         initComponents();
         setLocationRelativeTo(null);
+        try {
+            servicoProduto = (ServicoProduto) Naming.lookup("rmi://localhost:1099/ServicoProduto");
+            servicoCategoria = (ServicoCategoria) Naming.lookup("rmi://localhost:1099/ServicoCategoria");
+            servicoMovimentacao = (ServicoMovimentacao) Naming.lookup("rmi://localhost:1099/ServicoMovimentacao");
+
+            System.out.println("Conectado aos serviços RMI");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao conectar aos serviços RMI:\n" + e.getMessage(),
+                    "Erro de Conexão", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 
-   
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -127,29 +148,27 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
 
     private void JBCadastroCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBCadastroCategoriaActionPerformed
         // TODO add your handling code here:
-        //Instancia a tela "FrmCadastroCategoria"
-        FrmCadastroCategoria objeto = null;
         try {
-            objeto = new FrmCadastroCategoria();
-        } catch (SQLException ex) {
-            Logger.getLogger(FrmMenuPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+            FrmCadastroCategoria objeto = new FrmCadastroCategoria(servicoCategoria);
+            objeto.setVisible(true);
+        } catch (RemoteException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao abrir cadastro de categoria:\n" + e.getMessage());
         }
-        objeto.setVisible(true);
     }//GEN-LAST:event_JBCadastroCategoriaActionPerformed
 
     private void JBCadastroProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBCadastroProdutoActionPerformed
         // TODO add your handling code here:
         try {
-            new FrmCadastroProduto().setVisible(true);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Erro ao abrir Form:" + e.getMessage());
+            FrmCadastroProduto objeto = new FrmCadastroProduto(servicoProduto, servicoCategoria);
+            objeto.setVisible(true);
+        } catch (RemoteException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao abrir cadastro de produto:\n" + e.getMessage());
         }
     }//GEN-LAST:event_JBCadastroProdutoActionPerformed
 
     private void JBRelatorioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBRelatorioActionPerformed
         // TODO add your handling code here:
-        FrmRelatorio objeto = new FrmRelatorio();
+        FrmRelatorio objeto = new FrmRelatorio(servicoProduto);
         objeto.setVisible(true);
     }//GEN-LAST:event_JBRelatorioActionPerformed
 
@@ -161,11 +180,10 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
     private void JBGerenciaEstoqueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBGerenciaEstoqueActionPerformed
         // TODO add your handling code here:
         try {
-            FrmGerenciaEstoque objeto = new FrmGerenciaEstoque();
+            FrmGerenciaEstoque objeto = new FrmGerenciaEstoque(servicoMovimentacao, servicoProduto);
             objeto.setVisible(true);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Erro ao abrir Form:" + e.getMessage());
+        } catch (RemoteException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao abrir Gerência de Estoque:\n" + e.getMessage());
         }
     }//GEN-LAST:event_JBGerenciaEstoqueActionPerformed
 
