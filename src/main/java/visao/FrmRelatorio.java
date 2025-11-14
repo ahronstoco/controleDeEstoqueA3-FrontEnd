@@ -1,17 +1,21 @@
 package visao;
 
-import dao.ProdutoDAO;
+import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Locale;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import modelo.Produto;
+import servico.ServicoProduto;
 
 public class FrmRelatorio extends javax.swing.JFrame {
     
-    public FrmRelatorio() {
+    private final ServicoProduto servicoProduto;
+
+    public FrmRelatorio(ServicoProduto servicoProduto) {
         initComponents();
         setLocationRelativeTo(null);
+        this.servicoProduto = servicoProduto;
     }
 
     @SuppressWarnings("unchecked")
@@ -193,158 +197,123 @@ public class FrmRelatorio extends javax.swing.JFrame {
     }//GEN-LAST:event_JBFaltaActionPerformed
     private void gerarListaPrecos() {
         try {
-            ProdutoDAO dao = new ProdutoDAO();
-            List<Produto> lista = dao.listarPrecos();
+            List<Produto> lista = servicoProduto.listarProdutos();
 
             DefaultTableModel model = new DefaultTableModel(
-                    new Object[]{"Nome", "Preço Unitário", "Unidade", "Categoria"}, 0
+                new Object[]{"Nome", "Preço", "Unidade", "Categoria"}, 0
             );
 
-            for (Produto produto : lista) {
+            for (Produto p : lista) {
                 model.addRow(new Object[]{
-                    produto.getNome(),
-                    produto.getPrecoUnitario(),
-                    produto.getUnidade(),
-                    produto.getCategoria().getNome()
+                    p.getNome(),
+                    p.getPrecoUnitario(),
+                    p.getUnidade(),
+                    p.getCategoria().getNome()
                 });
             }
 
             JTRelatorio.setModel(model);
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro na lista de preços: " + e.getMessage());
         }
     }
 
+
     private void gerarBalanco() {
         try {
-            ProdutoDAO dao = new ProdutoDAO();
-            List<Produto> listaBalanco = dao.listarBalanco();
+            List<Produto> lista = servicoProduto.listarProdutos();
 
             DefaultTableModel model = new DefaultTableModel(
-                    new Object[]{"Nome", "Preço Unitário", "Quantidade", "Total"}, 0
+                new Object[]{"Nome", "Preço Unitário", "Quantidade", "Total"}, 0
             );
 
             double totalGeral = 0;
 
-            for (Produto produto : listaBalanco) {
-                double total = produto.getPrecoUnitario() * produto.getQuantidadeEstoque();
+            for (Produto p : lista) {
+                double total = p.getQuantidadeEstoque() * p.getPrecoUnitario();
                 totalGeral += total;
 
                 model.addRow(new Object[]{
-                    produto.getNome(),
-                    produto.getPrecoUnitario(),
-                    produto.getQuantidadeEstoque(),
-                    String.format(Locale.US,"%.2f", total)
+                    p.getNome(),
+                    p.getPrecoUnitario(),
+                    p.getQuantidadeEstoque(),
+                    String.format(Locale.US, "%.2f", total)
                 });
             }
 
             JTRelatorio.setModel(model);
-            JOptionPane.showMessageDialog(this, "Total em estoque: R$ " + String.format(Locale.US,"%.2f", totalGeral));
+            JOptionPane.showMessageDialog(this, 
+                "Valor total em estoque: R$ " + String.format(Locale.US, "%.2f", totalGeral));
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao gerar o relatório: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro no balanço físico: " + e.getMessage());
         }
     }
 
     private void gerarFaltaProdutos() {
         try {
-            ProdutoDAO dao = new ProdutoDAO();
-            List<Produto> listaFalta = dao.listarFaltaProduto();
+            List<Produto> lista = servicoProduto.listarProdutosAbaixoDoMinimo();
 
             DefaultTableModel model = new DefaultTableModel(
-                    new Object[]{"Nome", "Quantidade Mínima", "Quantidade no Estoque"}, 0
+                new Object[]{"Nome", "Qtd. Mínima", "Qtd. Atual"}, 0
             );
 
-            for (Produto produto : listaFalta) {
+            for (Produto p : lista) {
                 model.addRow(new Object[]{
-                    produto.getNome(),
-                    produto.getQuantidadeMinima(),
-                    produto.getQuantidadeEstoque()
+                    p.getNome(),
+                    p.getQuantidadeMinima(),
+                    p.getQuantidadeEstoque()
                 });
             }
 
             JTRelatorio.setModel(model);
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao gerar o relatório: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro no relatório de falta: " + e.getMessage());
         }
     }
 
     private void gerarExcessoProdutos() {
         try {
-            ProdutoDAO dao = new ProdutoDAO();
-            List<Produto> listaExcesso = dao.listarExcessoProdutos();
+            List<Produto> lista = servicoProduto.listarProdutosAcimaDoMaximo();
 
             DefaultTableModel model = new DefaultTableModel(
-                    new Object[]{"Nome", "Quantidade Máxima", "Quantidade no Estoque"}, 0
+                new Object[]{"Nome", "Qtd. Máxima", "Qtd. Atual"}, 0
             );
 
-            for (Produto produto : listaExcesso) {
+            for (Produto p : lista) {
                 model.addRow(new Object[]{
-                    produto.getNome(),
-                    produto.getQuantidadeMaxima(),
-                    produto.getQuantidadeEstoque()
+                    p.getNome(),
+                    p.getQuantidadeMaxima(),
+                    p.getQuantidadeEstoque()
                 });
             }
 
             JTRelatorio.setModel(model);
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao gerar o relatório: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro no relatório de excesso: " + e.getMessage());
         }
     }
 
     private void gerarPorCategoria() {
-        try {
-            ProdutoDAO dao = new ProdutoDAO();
-            List<String[]> listaCategoria = dao.listarPorCategoria();
+         try {
+            List<String[]> lista = servicoProduto.listarProdutosPorCategoria();
 
             DefaultTableModel model = new DefaultTableModel(
-                    new Object[]{"Categoria", "Total de Produtos"}, 0
+                new Object[]{"Categoria", "Total de Produtos"}, 0
             );
 
-            for (String[] linha : listaCategoria) {
+            for (String[] linha : lista) {
                 model.addRow(linha);
             }
 
             JTRelatorio.setModel(model);
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao gerar o relatório: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro no relatório por categoria: " + e.getMessage());
         }
-    }
-
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FrmRelatorio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FrmRelatorio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FrmRelatorio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FrmRelatorio.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new FrmRelatorio().setVisible(true);
-            }
-        });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

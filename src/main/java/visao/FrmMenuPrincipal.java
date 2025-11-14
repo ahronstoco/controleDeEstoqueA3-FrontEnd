@@ -1,14 +1,9 @@
 package visao;
 
-import java.rmi.Naming;
-import java.rmi.RemoteException;
+import javax.swing.JOptionPane;
 import servico.ServicoProduto;
 import servico.ServicoCategoria;
 import servico.ServicoMovimentacao;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 
 public class FrmMenuPrincipal extends javax.swing.JFrame {
 
@@ -16,22 +11,15 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
     private ServicoCategoria servicoCategoria;
     private ServicoMovimentacao servicoMovimentacao;
 
-    public FrmMenuPrincipal() {
+    public FrmMenuPrincipal(ServicoProduto servicoProduto,
+            ServicoCategoria servicoCategoria,
+            ServicoMovimentacao servicoMovimentacao) {
         initComponents();
         setLocationRelativeTo(null);
-        try {
-            servicoProduto = (ServicoProduto) Naming.lookup("rmi://localhost:1099/ServicoProduto");
-            servicoCategoria = (ServicoCategoria) Naming.lookup("rmi://localhost:1099/ServicoCategoria");
-            servicoMovimentacao = (ServicoMovimentacao) Naming.lookup("rmi://localhost:1099/ServicoMovimentacao");
 
-            System.out.println("Conectado aos serviços RMI");
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                    "Erro ao conectar aos serviços RMI:\n" + e.getMessage(),
-                    "Erro de Conexão", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
+        this.servicoProduto = servicoProduto;
+        this.servicoCategoria = servicoCategoria;
+        this.servicoMovimentacao = servicoMovimentacao;
     }
 
     @SuppressWarnings("unchecked")
@@ -148,28 +136,17 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
 
     private void JBCadastroCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBCadastroCategoriaActionPerformed
         // TODO add your handling code here:
-        try {
-            FrmCadastroCategoria objeto = new FrmCadastroCategoria(servicoCategoria);
-            objeto.setVisible(true);
-        } catch (RemoteException e) {
-            JOptionPane.showMessageDialog(this, "Erro ao abrir cadastro de categoria:\n" + e.getMessage());
-        }
+       new FrmCadastroCategoria(servicoCategoria).setVisible(true);
     }//GEN-LAST:event_JBCadastroCategoriaActionPerformed
 
     private void JBCadastroProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBCadastroProdutoActionPerformed
         // TODO add your handling code here:
-        try {
-            FrmCadastroProduto objeto = new FrmCadastroProduto(servicoProduto, servicoCategoria);
-            objeto.setVisible(true);
-        } catch (RemoteException e) {
-            JOptionPane.showMessageDialog(this, "Erro ao abrir cadastro de produto:\n" + e.getMessage());
-        }
+       new FrmCadastroProduto(servicoProduto, servicoCategoria).setVisible(true);
     }//GEN-LAST:event_JBCadastroProdutoActionPerformed
 
     private void JBRelatorioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBRelatorioActionPerformed
         // TODO add your handling code here:
-        FrmRelatorio objeto = new FrmRelatorio(servicoProduto);
-        objeto.setVisible(true);
+       new FrmRelatorio(servicoProduto).setVisible(true);
     }//GEN-LAST:event_JBRelatorioActionPerformed
 
     private void JBSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBSairActionPerformed
@@ -179,45 +156,8 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
 
     private void JBGerenciaEstoqueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBGerenciaEstoqueActionPerformed
         // TODO add your handling code here:
-        try {
-            FrmGerenciaEstoque objeto = new FrmGerenciaEstoque(servicoMovimentacao, servicoProduto);
-            objeto.setVisible(true);
-        } catch (RemoteException e) {
-            JOptionPane.showMessageDialog(this, "Erro ao abrir Gerência de Estoque:\n" + e.getMessage());
-        }
+      new FrmGerenciaEstoque(servicoMovimentacao, servicoProduto).setVisible(true);
     }//GEN-LAST:event_JBGerenciaEstoqueActionPerformed
-
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FrmMenuPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FrmMenuPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FrmMenuPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FrmMenuPrincipal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new FrmMenuPrincipal().setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JBCadastroCategoria;

@@ -3,30 +3,36 @@ package visao;
 import java.sql.SQLException;
 import modelo.Produto;
 import javax.swing.table.DefaultTableModel;
-import dao.ProdutoDAO;
 import java.awt.Color;
 import java.awt.Font;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import modelo.Categoria;
 import modelo.Tamanho;
+import servico.ServicoCategoria;
+import servico.ServicoProduto;
 
 public class FrmCadastroProduto extends javax.swing.JFrame {
 
-    private Produto produto;
-    private ProdutoDAO dao;
+    private final ServicoProduto servicoProduto;
+    private final ServicoCategoria servicoCategoria;
     private JComboBox<Categoria> JCCategoria;
 
-    public FrmCadastroProduto() throws SQLException {
+    public FrmCadastroProduto(ServicoProduto servicoProduto, ServicoCategoria servicoCategoria) {
         initComponents();
         setLocationRelativeTo(null);
-        this.produto = new Produto();
-        dao = new ProdutoDAO();
+
+        this.servicoProduto = servicoProduto;
+        this.servicoCategoria = servicoCategoria;
+
+        configurarCategoriaCombo();
+        carregarCategorias();
         carregarProdutos();
+    }
+
+    private void configurarCategoriaCombo() {
         JCCategoria = new JComboBox<>();
         JCCategoria.setBounds(600, 57, 150, 20); // ajuste as coordenadas
         JCCategoria.setBackground(new Color(209, 209, 209));      // fundo escuro
@@ -34,36 +40,41 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
         JCCategoria.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 12)); // mesma fonte usada no JCMedida
         getContentPane().add(JCCategoria);
         carregarCategoria();
-        this.produto = new Produto();
-        this.dao = new ProdutoDAO();
     }
 
     private void carregarCategoria() {
         try {
-            // Conexão direta com o banco
-            Connection conn = DriverManager.getConnection(
-                    "jdbc:mysql://127.0.0.1:3306/controleestoquea3", "a3prog", "unisul@prog3"
-            );
+            JCCategoria.removeAllItems();
 
-            String sql = "SELECT * FROM categoria";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-
-            while (rs.next()) {
-                Categoria cat = new Categoria();
-                cat.setIdCategoria(rs.getInt("idCategoria"));
-                cat.setNome(rs.getString("nome"));
-                cat.setTamanho(Tamanho.valueOf(rs.getString("tamanho")));
-                cat.setEmbalagem(rs.getString("embalagem"));
+            for (Categoria cat : servicoCategoria.listarCategorias()) {
                 JCCategoria.addItem(cat);
             }
 
-            rs.close();
-            stmt.close();
-            conn.close();
+        } catch (RemoteException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias (RMI): " + e.getMessage());
+        }
+    }
 
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar categorias: " + e.getMessage());
+    private void carregarProdutos() {
+        try {
+            DefaultTableModel model = (DefaultTableModel) JTProduto.getModel();
+            model.setRowCount(0);
+
+            for (Produto p : servicoProduto.listarProdutos()) {
+                model.addRow(new Object[]{
+                    p.getIdProduto(),
+                    p.getNome(),
+                    p.getQuantidadeEstoque(),
+                    p.getUnidade(),
+                    p.getPrecoUnitario(),
+                    p.getCategoria(),
+                    p.getQuantidadeMinima(),
+                    p.getQuantidadeMaxima()
+                });
+            }
+
+        } catch (RemoteException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar produtos (RMI): " + e.getMessage());
         }
     }
 
@@ -298,23 +309,22 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
 
     private void JBRemoverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBRemoverActionPerformed
         // TODO add your handling code here:
-        int selectedRow = JTProduto.getSelectedRow();
+        int row = JTProduto.getSelectedRow();
 
-        // Caso o usuário não escolha uma linha para deletar.
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(null, "Selecione um linha para apagar.");
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um produto para remover.");
             return;
         }
 
-        DefaultTableModel model = (DefaultTableModel) JTProduto.getModel();
-        int idProduto = Integer.parseInt(model.getValueAt(selectedRow, 0).toString());
+        int idProduto = (int) JTProduto.getValueAt(row, 0);
 
-        dao.apagar(idProduto);
-
-        // Removendo a linha
-        model.removeRow(selectedRow);
-
-        JOptionPane.showMessageDialog(null, "Produto apagado.");
+        try {
+            servicoProduto.excluirProduto(idProduto);
+            carregarProdutos();
+            JOptionPane.showMessageDialog(this, "Produto removido com sucesso!");
+        } catch (RemoteException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao excluir produto (RMI): " + e.getMessage());
+        }
     }//GEN-LAST:event_JBRemoverActionPerformed
 
     private void JTFQuantidadeMinimaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFQuantidadeMinimaActionPerformed
@@ -328,118 +338,31 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
     private void JBAdicionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBAdicionarActionPerformed
         // TODO add your handling code here:
         try {
-            String nome = JTFNome.getText();
-            String unidade = JCMedida.getSelectedItem().toString();
+            Produto produto = new Produto();
             Categoria categoria = (Categoria) JCCategoria.getSelectedItem();
 
-            Produto produto = new Produto();
-            if (this.JTFNome.getText().length() < 2) {
-                throw new Mensagem("O nome do produto deve conter no minimo 2 caractéres.");
-            } else {
-                produto.setNome(nome);
-            }
-
-            if (JTFQuantidade.getText().trim().isEmpty()) {
-                throw new Mensagem("Deve conter no minimo 1 produto.");
-            } else {
-                int quantidadeEstoque = Integer.parseInt(JTFQuantidade.getText().trim());
-                produto.setQuantidadeEstoque(quantidadeEstoque);
-            }
-
-            if (JTFQuantidadeMinima.getText().trim().isEmpty()) {
-                throw new Mensagem("A quantidade minima deve ser acima de 0.");
-            } else {
-                int quantidadeMinima = Integer.parseInt(JTFQuantidadeMinima.getText().trim());
-                produto.setQuantidadeMinima(quantidadeMinima);
-            }
-            if (JTFQuantidadeMaxima.getText().trim().isEmpty()) {
-                throw new Mensagem("A quantidade máxima deve ser acima de 0.");
-            } else {
-                int quantidadeMaxima = Integer.parseInt(JTFQuantidadeMaxima.getText().trim());
-                produto.setQuantidadeMaxima(quantidadeMaxima);
-            }
-            if (JTFPreco.getText().trim().isEmpty()) {
-                throw new Mensagem("O preço deve ser acima de R$ 0.");
-            } else {
-                double preco = Double.parseDouble(JTFPreco.getText().trim());
-                produto.setPrecoUnitario(preco);
-            }
-
-            produto.setUnidade(unidade);
+            produto.setNome(JTFNome.getText());
+            produto.setUnidade(JCMedida.getSelectedItem().toString());
             produto.setCategoria(categoria);
 
-            dao.inserir(produto);
-            carregarProdutos();
-            JOptionPane.showMessageDialog(null, "Produto cadastrado com sucesso!");
-            JTFNome.setText("");
-            JTFPreco.setText("");
-            JTFQuantidade.setText("");
-            JTFQuantidadeMinima.setText("");
-            JTFQuantidadeMaxima.setText("");
+            produto.setQuantidadeEstoque(Integer.parseInt(JTFQuantidade.getText()));
+            produto.setQuantidadeMinima(Integer.parseInt(JTFQuantidadeMinima.getText()));
+            produto.setQuantidadeMaxima(Integer.parseInt(JTFQuantidadeMaxima.getText()));
+            produto.setPrecoUnitario(Double.parseDouble(JTFPreco.getText()));
 
+            servicoProduto.salvarProduto(produto);
+
+            JOptionPane.showMessageDialog(this, "Produto cadastrado com sucesso.");
+            carregarProdutos();
+
+        } catch (RemoteException e) {
+            JOptionPane.showMessageDialog(this, "Erro no servidor: " + e.getMessage());
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage() != null ? e.getMessage() : toString(), "Erro ao adicionar produto.", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Erro ao adicionar produto: " + e.getMessage());
         }
     }//GEN-LAST:event_JBAdicionarActionPerformed
-    private void carregarProdutos() {
-        try {
-            DefaultTableModel model = (DefaultTableModel) JTProduto.getModel();
-            model.setRowCount(0); // Limpa a tabela antes de recarregar os dados
 
-            for (Produto p : dao.listar()) {
-                model.addRow(new Object[]{
-                    p.getIdProduto(),
-                    p.getNome(),
-                    p.getQuantidadeEstoque(),
-                    p.getUnidade(),
-                    p.getPrecoUnitario(),
-                    p.getCategoria(),
-                    p.getQuantidadeMinima(),
-                    p.getQuantidadeMaxima()
-                });
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Erro ao carregar categorias: " + e.getMessage());
-        }
-    }
-
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FrmCadastroProduto.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FrmCadastroProduto.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FrmCadastroProduto.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FrmCadastroProduto.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    new FrmCadastroProduto().setVisible(true);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(null, "Erro ao abrir Form" + e.getMessage());
-                }
-            }
-        });
-    }
-
+  
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JBAdicionar;
     private javax.swing.JButton JBFechar;
@@ -461,4 +384,8 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
+
+    private void carregarCategorias() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

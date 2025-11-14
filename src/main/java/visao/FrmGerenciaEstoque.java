@@ -1,20 +1,26 @@
 package visao;
 
 import javax.swing.JOptionPane;
-import dao.ProdutoDAO;
-import java.sql.SQLException;
+import java.rmi.RemoteException;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import modelo.Produto;
+import servico.ServicoMovimentacao;
+import servico.ServicoProduto;
 
 public class FrmGerenciaEstoque extends javax.swing.JFrame {
-    private ProdutoDAO dao;
 
-    public FrmGerenciaEstoque() throws SQLException {
+    private final ServicoProduto servicoProduto;
+
+    public FrmGerenciaEstoque(ServicoProduto servicoProduto) {
         initComponents();
         setLocationRelativeTo(null);
-        dao = new ProdutoDAO();
+        this.servicoProduto = servicoProduto;
         carregarProdutos();
+    }
+
+    FrmGerenciaEstoque(ServicoMovimentacao servicoMovimentacao, ServicoProduto servicoProduto) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @SuppressWarnings("unchecked")
@@ -284,18 +290,15 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
             int idProduto = Integer.parseInt(JTEstoque.getValueAt(selectedRow, 0).toString());
             double percentual = Double.parseDouble(JTFAumentoPreco.getText()) / 100.0;
 
-            ProdutoDAO dao = new ProdutoDAO();
-            dao.aplicarDesconto(idProduto, -percentual);
+            servicoProduto.aplicarDesconto(idProduto, -percentual);
             JOptionPane.showMessageDialog(this, "Preço aumentado com sucesso.");
             carregarProdutos();
+
+            JTFAumentoPreco.setText("");
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro ao aplicar aumento: " + e.getMessage());
         }
-        
-        // Setando valores iniciais
-        
-        JTFAumentoPreco.setText("");
     }//GEN-LAST:event_JBAplicarAumentoActionPerformed
 
     private void JTFQuantidadeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFQuantidadeActionPerformed
@@ -335,18 +338,15 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
             int idProduto = Integer.parseInt(JTEstoque.getValueAt(selectedRow, 0).toString());
             double percentual = Double.parseDouble(JTFReducaoPreco.getText()) / 100.0;
 
-            ProdutoDAO dao = new ProdutoDAO();
-            dao.aplicarDesconto(idProduto, percentual);
+            servicoProduto.aplicarDesconto(idProduto, percentual);
             JOptionPane.showMessageDialog(this, "Desconto aplicado com sucesso.");
             carregarProdutos();
+
+            JTFReducaoPreco.setText("");
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro ao aplicar desconto: " + e.getMessage());
         }
-        
-        // Setando os valores iniciais
-        
-        JTFReducaoPreco.setText("");
     }//GEN-LAST:event_JBAplicarReducaoActionPerformed
 
     private void JBAlterarQuantidadeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBAlterarQuantidadeActionPerformed
@@ -363,8 +363,6 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
             int quantidade = Integer.parseInt(JTFQuantidade.getText());
             String operacao = JCOperacao.getSelectedItem().toString();
 
-            ProdutoDAO dao = new ProdutoDAO();
-
             int novaQuantidade = operacao.equals("Entrada")
                     ? quantidadeAtual + quantidade
                     : quantidadeAtual - quantidade;
@@ -374,34 +372,35 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
                 return;
             }
 
-            dao.atualizarEstoque(idProduto, novaQuantidade);
+            servicoProduto.atualizarEstoque(idProduto, novaQuantidade);
             JOptionPane.showMessageDialog(this, "Estoque atualizado.");
             carregarProdutos();
-            
-            Produto produto = dao.buscarPorId(idProduto);
+
+            Produto produto = servicoProduto.buscarProdutoPorId(idProduto);
+
             if (produto.getQuantidadeEstoque() < produto.getQuantidadeMinima()) {
-                JOptionPane.showMessageDialog(null,
-                        "Estoque abaixo da quantidade mínima! \nQuantidade em estoque: " + produto.getQuantidadeEstoque()+ 
-                                ". \nQuantidade mínima: " +produto.getQuantidadeMinima()+".",
-                        "ATENÇÃO:",
+                JOptionPane.showMessageDialog(this,
+                        "Estoque abaixo da quantidade mínima!\n"
+                        + "Em estoque: " + produto.getQuantidadeEstoque()
+                        + "\nMínima: " + produto.getQuantidadeMinima(),
+                        "ATENÇÃO",
                         JOptionPane.WARNING_MESSAGE);
             }
 
             if (produto.getQuantidadeEstoque() > produto.getQuantidadeMaxima()) {
-                JOptionPane.showMessageDialog(null,
-                        "Estoque acima da quantidade máxima! \nQuantidade em estoque: " +produto.getQuantidadeEstoque()+
-                                ". \nQuantidade máxima: " +produto.getQuantidadeMaxima()+".",
-                        "ATENÇÃO:",
+                JOptionPane.showMessageDialog(this,
+                        "Estoque acima da quantidade máxima!\n"
+                        + "Em estoque: " + produto.getQuantidadeEstoque()
+                        + "\nMáxima: " + produto.getQuantidadeMaxima(),
+                        "ATENÇÃO",
                         JOptionPane.WARNING_MESSAGE);
             }
+
+            JTFQuantidade.setText("");
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro: " + e.getMessage());
         }
-        
-        
-        // Setando os valores iniciais
-        
-        JTFQuantidade.setText("");
     }//GEN-LAST:event_JBAlterarQuantidadeActionPerformed
 
     private void JTFPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFPesquisarActionPerformed
@@ -413,7 +412,9 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
             DefaultTableModel model = (DefaultTableModel) JTEstoque.getModel();
             model.setRowCount(0);
 
-            for (Produto p : dao.listar()) {
+            List<Produto> lista = servicoProduto.listarProdutos();
+
+            for (Produto p : lista) {
                 model.addRow(new Object[]{
                     p.getIdProduto(),
                     p.getNome(),
@@ -425,29 +426,28 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
                     p.getQuantidadeMaxima()
                 });
             }
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Erro ao carregar categorias: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro ao carregar produtos: " + e.getMessage());
         }
     }
 
     private void buscarPorId(int idProduto) {
         try {
-            ProdutoDAO dao = new ProdutoDAO();
-            Produto produto = dao.buscarPorId(idProduto);
-
+            Produto p = servicoProduto.buscarProdutoPorId(id);
             DefaultTableModel model = (DefaultTableModel) JTEstoque.getModel();
             model.setRowCount(0);
 
-            if (produto != null) {
+            if (p != null) {
                 model.addRow(new Object[]{
-                    produto.getIdProduto(),
-                    produto.getNome(),
-                    produto.getQuantidadeEstoque(),
-                    produto.getUnidade(),
-                    produto.getPrecoUnitario(),
-                    produto.getCategoria().getNome(),
-                    produto.getQuantidadeMinima(),
-                    produto.getQuantidadeMaxima()
+                    p.getIdProduto(),
+                    p.getNome(),
+                    p.getQuantidadeEstoque(),
+                    p.getUnidade(),
+                    p.getPrecoUnitario(),
+                    p.getCategoria(),
+                    p.getQuantidadeMinima(),
+                    p.getQuantidadeMaxima()
                 });
             } else {
                 JOptionPane.showMessageDialog(this, "Produto não encontrado.");
@@ -459,21 +459,20 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
 
     private void buscarPorNome(String nome) {
         try {
-            ProdutoDAO dao = new ProdutoDAO();
-            List<Produto> lista = dao.buscarPorNome(nome);
+            List<Produto> lista = servicoProduto.buscarProdutoPorNome(nome);
             DefaultTableModel model = (DefaultTableModel) JTEstoque.getModel();
             model.setRowCount(0);
 
-            for (Produto produto : lista) {
+            for (Produto p : lista) {
                 model.addRow(new Object[]{
-                    produto.getIdProduto(),
-                    produto.getNome(),
-                    produto.getQuantidadeEstoque(),
-                    produto.getUnidade(),
-                    produto.getPrecoUnitario(),
-                    produto.getCategoria().getNome(),
-                    produto.getQuantidadeMinima(),
-                    produto.getQuantidadeMaxima()
+                    p.getIdProduto(),
+                    p.getNome(),
+                    p.getQuantidadeEstoque(),
+                    p.getUnidade(),
+                    p.getPrecoUnitario(),
+                    p.getCategoria(),
+                    p.getQuantidadeMinima(),
+                    p.getQuantidadeMaxima()
                 });
             }
 
@@ -482,7 +481,6 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
         }
     }
 
-    
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">

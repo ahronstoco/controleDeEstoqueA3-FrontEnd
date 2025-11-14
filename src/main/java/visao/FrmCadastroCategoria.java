@@ -1,7 +1,5 @@
 package visao;
 
-import modelo.Categoria;
-import modelo.Tamanho;
 import servico.ServicoCategoria;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -28,6 +26,10 @@ public class FrmCadastroCategoria extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null,
                     "Erro ao iniciar formulário: " + e.getMessage());
         }
+    }
+
+    FrmCadastroCategoria(ServicoCategoria servicoCategoria) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private void conectarServico() throws Exception {
@@ -371,16 +373,10 @@ public class FrmCadastroCategoria extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    new FrmCadastroCategoria().setVisible(true);
-                } catch (SQLException ex) {
-                    Logger.getLogger(FrmCadastroCategoria.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        });
-    }
+         java.awt.EventQueue.invokeLater(() -> {
+        new FrmCadastroCategoria().setVisible(true);
+    });
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JBAdicionar;
