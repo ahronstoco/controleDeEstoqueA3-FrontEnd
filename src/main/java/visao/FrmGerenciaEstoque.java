@@ -4,6 +4,7 @@ import javax.swing.JOptionPane;
 import java.rmi.RemoteException;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
+import modelo.Movimentacao;
 import modelo.Produto;
 import servico.ServicoMovimentacao;
 import servico.ServicoProduto;
@@ -11,16 +12,14 @@ import servico.ServicoProduto;
 public class FrmGerenciaEstoque extends javax.swing.JFrame {
 
     private final ServicoProduto servicoProduto;
+    private final ServicoMovimentacao servicoMovimentacao;
 
-    public FrmGerenciaEstoque(ServicoProduto servicoProduto) {
+    public FrmGerenciaEstoque(ServicoMovimentacao servicoMovimentacao, ServicoProduto servicoProduto) {
         initComponents();
         setLocationRelativeTo(null);
         this.servicoProduto = servicoProduto;
+        this.servicoMovimentacao = servicoMovimentacao;
         carregarProdutos();
-    }
-
-    FrmGerenciaEstoque(ServicoMovimentacao servicoMovimentacao, ServicoProduto servicoProduto) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @SuppressWarnings("unchecked")
@@ -275,7 +274,6 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
-        // TODO add your handling code here:
         this.dispose();
     }//GEN-LAST:event_JBFecharActionPerformed
 
@@ -291,12 +289,16 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
             double percentual = Double.parseDouble(JTFAumentoPreco.getText()) / 100.0;
 
             servicoProduto.aplicarDesconto(idProduto, -percentual);
+
+            registrarMov(idProduto, "entrada", 0,
+                    "AUMENTO DE: +" + (percentual * 100) + "%");
+
             JOptionPane.showMessageDialog(this, "Preço aumentado com sucesso.");
             carregarProdutos();
-
             JTFAumentoPreco.setText("");
 
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Erro ao aplicar aumento: " + e.getMessage());
         }
     }//GEN-LAST:event_JBAplicarAumentoActionPerformed
@@ -318,8 +320,8 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
     }//GEN-LAST:event_JTFReducaoPrecoActionPerformed
 
     private void JBPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBPesquisarActionPerformed
-        // TODO add your handling code here:
         String texto = JTFPesquisar.getText().trim();
+
         if (texto.matches("\\d+")) {
             buscarPorId(Integer.parseInt(texto));
         } else {
@@ -339,21 +341,24 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
             double percentual = Double.parseDouble(JTFReducaoPreco.getText()) / 100.0;
 
             servicoProduto.aplicarDesconto(idProduto, percentual);
+
+            registrarMov(idProduto, "saida", 0,
+                    "REDUÇÃO DE: -" + (percentual * 100) + "%");
+
             JOptionPane.showMessageDialog(this, "Desconto aplicado com sucesso.");
             carregarProdutos();
-
             JTFReducaoPreco.setText("");
 
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Erro ao aplicar desconto: " + e.getMessage());
         }
     }//GEN-LAST:event_JBAplicarReducaoActionPerformed
 
     private void JBAlterarQuantidadeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBAlterarQuantidadeActionPerformed
         int selectedRow = JTEstoque.getSelectedRow();
-
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Selecione um produto na tabela.");
+            JOptionPane.showMessageDialog(this, "Selecione um produto.");
             return;
         }
 
@@ -373,6 +378,12 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
             }
 
             servicoProduto.atualizarEstoque(idProduto, novaQuantidade);
+
+            registrarMov(idProduto,
+                    operacao.equals("Entrada") ? "entrada" : "saida",
+                    quantidade,
+                    "MOV. DE ESTOQUE");
+
             JOptionPane.showMessageDialog(this, "Estoque atualizado.");
             carregarProdutos();
 
@@ -399,12 +410,12 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
             JTFQuantidade.setText("");
 
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Erro: " + e.getMessage());
         }
     }//GEN-LAST:event_JBAlterarQuantidadeActionPerformed
 
     private void JTFPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFPesquisarActionPerformed
-        // TODO add your handling code here:
         JBPesquisar.doClick();
     }//GEN-LAST:event_JTFPesquisarActionPerformed
     private void carregarProdutos() {
@@ -428,13 +439,14 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Erro ao carregar produtos: " + e.getMessage());
         }
     }
 
     private void buscarPorId(int idProduto) {
         try {
-            Produto p = servicoProduto.buscarProdutoPorId(id);
+            Produto p = servicoProduto.buscarProdutoPorId(idProduto);
             DefaultTableModel model = (DefaultTableModel) JTEstoque.getModel();
             model.setRowCount(0);
 
@@ -453,6 +465,7 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Produto não encontrado.");
             }
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Erro ao buscar produto: " + e.getMessage());
         }
     }
@@ -475,47 +488,25 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
                     p.getQuantidadeMaxima()
                 });
             }
-
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Erro ao buscar produtos: " + e.getMessage());
         }
     }
 
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
+    private void registrarMov(int idProduto, String tipo, int quantidade, String obs) {
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FrmGerenciaEstoque.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FrmGerenciaEstoque.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FrmGerenciaEstoque.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FrmGerenciaEstoque.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            servicoMovimentacao.registrarMovimentacao(
+                    idProduto,
+                    tipo,
+                    quantidade,
+                    obs
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao registrar movimentação: " + e.getMessage());
         }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    new FrmGerenciaEstoque().setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(null, "Erro ao abrir Form" + e.getMessage());
-                }
-            }
-        });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

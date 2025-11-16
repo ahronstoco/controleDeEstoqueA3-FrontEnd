@@ -1,21 +1,26 @@
 package visao;
 
 import java.rmi.RemoteException;
+import java.rmi.Naming;
 import java.util.List;
 import java.util.Locale;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import modelo.Movimentacao;
 import modelo.Produto;
 import servico.ServicoProduto;
+import servico.ServicoMovimentacao;
 
 public class FrmRelatorio extends javax.swing.JFrame {
-    
-    private final ServicoProduto servicoProduto;
 
-    public FrmRelatorio(ServicoProduto servicoProduto) {
+    private final ServicoProduto servicoProduto;
+    private final ServicoMovimentacao servicoMovimentacao;
+
+    public FrmRelatorio(ServicoMovimentacao servicoMovimentacao, ServicoProduto servicoProduto) {
         initComponents();
         setLocationRelativeTo(null);
         this.servicoProduto = servicoProduto;
+        this.servicoMovimentacao = servicoMovimentacao;
     }
 
     @SuppressWarnings("unchecked")
@@ -31,6 +36,7 @@ public class FrmRelatorio extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         JTRelatorio = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
+        JBMovimentacoes = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Relatório");
@@ -51,6 +57,7 @@ public class FrmRelatorio extends javax.swing.JFrame {
         JBLista.setForeground(new java.awt.Color(51, 51, 51));
         JBLista.setText("Lista de preços");
         JBLista.setToolTipText("");
+        JBLista.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         JBLista.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JBListaActionPerformed(evt);
@@ -123,6 +130,17 @@ public class FrmRelatorio extends javax.swing.JFrame {
 
         jLabel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Relatórios", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 16), new java.awt.Color(51, 51, 51))); // NOI18N
 
+        JBMovimentacoes.setBackground(new java.awt.Color(204, 204, 204));
+        JBMovimentacoes.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        JBMovimentacoes.setForeground(new java.awt.Color(51, 51, 51));
+        JBMovimentacoes.setText("Movimentações");
+        JBMovimentacoes.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        JBMovimentacoes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                JBMovimentacoesActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -134,14 +152,16 @@ public class FrmRelatorio extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 757, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(47, 47, 47)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(JBFalta, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(JBExcesso, javax.swing.GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE)
-                                .addComponent(JBBalanco, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(JBLista, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(JBFechar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(JBCategoria, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(JBMovimentacoes, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(JBBalanco, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(JBLista, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE)
+                                    .addComponent(JBFechar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(JBCategoria, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(JBExcesso, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(JBFalta, javax.swing.GroupLayout.PREFERRED_SIZE, 137, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(0, 21, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -154,15 +174,17 @@ public class FrmRelatorio extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(JBLista, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(37, 37, 37)
+                        .addGap(18, 18, 18)
                         .addComponent(JBBalanco, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(37, 37, 37)
+                        .addGap(18, 18, 18)
                         .addComponent(JBFalta, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(37, 37, 37)
+                        .addGap(18, 18, 18)
                         .addComponent(JBExcesso, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
                         .addComponent(JBCategoria, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(56, 56, 56)
+                        .addGap(18, 18, 18)
+                        .addComponent(JBMovimentacoes, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(JBFechar, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 489, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(16, Short.MAX_VALUE))
@@ -195,12 +217,16 @@ public class FrmRelatorio extends javax.swing.JFrame {
     private void JBFaltaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFaltaActionPerformed
         gerarFaltaProdutos();
     }//GEN-LAST:event_JBFaltaActionPerformed
+
+    private void JBMovimentacoesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBMovimentacoesActionPerformed
+        gerarMovimentacoes();
+    }//GEN-LAST:event_JBMovimentacoesActionPerformed
     private void gerarListaPrecos() {
         try {
             List<Produto> lista = servicoProduto.listarProdutos();
 
             DefaultTableModel model = new DefaultTableModel(
-                new Object[]{"Nome", "Preço", "Unidade", "Categoria"}, 0
+                    new Object[]{"Nome", "Preço", "Unidade", "Categoria"}, 0
             );
 
             for (Produto p : lista) {
@@ -219,13 +245,12 @@ public class FrmRelatorio extends javax.swing.JFrame {
         }
     }
 
-
     private void gerarBalanco() {
         try {
             List<Produto> lista = servicoProduto.listarProdutos();
 
             DefaultTableModel model = new DefaultTableModel(
-                new Object[]{"Nome", "Preço Unitário", "Quantidade", "Total"}, 0
+                    new Object[]{"Nome", "Preço Unitário", "Quantidade", "Total"}, 0
             );
 
             double totalGeral = 0;
@@ -243,8 +268,8 @@ public class FrmRelatorio extends javax.swing.JFrame {
             }
 
             JTRelatorio.setModel(model);
-            JOptionPane.showMessageDialog(this, 
-                "Valor total em estoque: R$ " + String.format(Locale.US, "%.2f", totalGeral));
+            JOptionPane.showMessageDialog(this,
+                    "Valor total em estoque: R$ " + String.format(Locale.US, "%.2f", totalGeral));
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro no balanço físico: " + e.getMessage());
@@ -256,7 +281,7 @@ public class FrmRelatorio extends javax.swing.JFrame {
             List<Produto> lista = servicoProduto.listarProdutosAbaixoDoMinimo();
 
             DefaultTableModel model = new DefaultTableModel(
-                new Object[]{"Nome", "Qtd. Mínima", "Qtd. Atual"}, 0
+                    new Object[]{"Nome", "Qtd. Mínima", "Qtd. Atual"}, 0
             );
 
             for (Produto p : lista) {
@@ -279,7 +304,7 @@ public class FrmRelatorio extends javax.swing.JFrame {
             List<Produto> lista = servicoProduto.listarProdutosAcimaDoMaximo();
 
             DefaultTableModel model = new DefaultTableModel(
-                new Object[]{"Nome", "Qtd. Máxima", "Qtd. Atual"}, 0
+                    new Object[]{"Nome", "Qtd. Máxima", "Qtd. Atual"}, 0
             );
 
             for (Produto p : lista) {
@@ -298,11 +323,11 @@ public class FrmRelatorio extends javax.swing.JFrame {
     }
 
     private void gerarPorCategoria() {
-         try {
+        try {
             List<String[]> lista = servicoProduto.listarProdutosPorCategoria();
 
             DefaultTableModel model = new DefaultTableModel(
-                new Object[]{"Categoria", "Total de Produtos"}, 0
+                    new Object[]{"Categoria", "Total de Produtos"}, 0
             );
 
             for (String[] linha : lista) {
@@ -316,6 +341,40 @@ public class FrmRelatorio extends javax.swing.JFrame {
         }
     }
 
+    private void gerarMovimentacoes() {
+        try {
+            String[] colunas = {
+                "ID Mov.", "ID Produto", "Tipo", "Quantidade", "Data", "Observação"
+            };
+
+            DefaultTableModel model = new DefaultTableModel(colunas, 0) {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+
+            JTRelatorio.setModel(model);
+
+            List<Movimentacao> lista = servicoMovimentacao.listarTodasMovimentacoes();
+
+            for (Movimentacao mov : lista) {
+                model.addRow(new Object[]{
+                    mov.getIdMovimentacao(),
+                    mov.getIdProduto(),
+                    mov.getTipo(),
+                    mov.getQuantidade(),
+                    mov.getData(),
+                    mov.getObservacao()
+                });
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro ao gerar relatório de movimentações: " + e.getMessage());
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JBBalanco;
     private javax.swing.JButton JBCategoria;
@@ -323,6 +382,7 @@ public class FrmRelatorio extends javax.swing.JFrame {
     private javax.swing.JButton JBFalta;
     private javax.swing.JButton JBFechar;
     private javax.swing.JButton JBLista;
+    private javax.swing.JButton JBMovimentacoes;
     private javax.swing.JTable JTRelatorio;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;

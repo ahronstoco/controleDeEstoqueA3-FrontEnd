@@ -29,7 +29,7 @@ public class Principal {
             ServicoCategoria servicoCategoria = ConexaoRMI.categoria();
             ServicoMovimentacao servicoMovimentacao = ConexaoRMI.movimentacao();
 
-            System.out.println("Conexão estabelecida com sucesso!");
+            System.out.println("Conexoo estabelecida.");
 
             java.awt.EventQueue.invokeLater(() -> {
                 FrmMenuPrincipal tela = new FrmMenuPrincipal(

@@ -1,6 +1,5 @@
 package visao;
 
-import java.sql.SQLException;
 import modelo.Produto;
 import javax.swing.table.DefaultTableModel;
 import java.awt.Color;
@@ -10,7 +9,6 @@ import java.rmi.RemoteException;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import modelo.Categoria;
-import modelo.Tamanho;
 import servico.ServicoCategoria;
 import servico.ServicoProduto;
 
@@ -39,10 +37,9 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
         JCCategoria.setForeground(Color.BLACK);   // texto claro
         JCCategoria.setFont(new Font("Segoe UI Semibold", Font.PLAIN, 12)); // mesma fonte usada no JCMedida
         getContentPane().add(JCCategoria);
-        carregarCategoria();
     }
 
-    private void carregarCategoria() {
+    private void carregarCategorias() {
         try {
             JCCategoria.removeAllItems();
 
@@ -337,10 +334,18 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
 
     private void JBAdicionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBAdicionarActionPerformed
         // TODO add your handling code here:
-        try {
-            Produto produto = new Produto();
-            Categoria categoria = (Categoria) JCCategoria.getSelectedItem();
+         try {
 
+            if (JTFNome.getText().trim().isEmpty()) {
+                throw new Exception("O nome não pode estar vazio.");
+            }
+
+            Categoria categoria = (Categoria) JCCategoria.getSelectedItem();
+            if (categoria == null) {
+                throw new Exception("Selecione uma categoria.");
+            }
+
+            Produto produto = new Produto();
             produto.setNome(JTFNome.getText());
             produto.setUnidade(JCMedida.getSelectedItem().toString());
             produto.setCategoria(categoria);
@@ -355,6 +360,8 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Produto cadastrado com sucesso.");
             carregarProdutos();
 
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Valores numéricos inválidos.");
         } catch (RemoteException e) {
             JOptionPane.showMessageDialog(this, "Erro no servidor: " + e.getMessage());
         } catch (Exception e) {
@@ -362,7 +369,7 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_JBAdicionarActionPerformed
 
-  
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JBAdicionar;
     private javax.swing.JButton JBFechar;
@@ -384,8 +391,4 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
-
-    private void carregarCategorias() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }

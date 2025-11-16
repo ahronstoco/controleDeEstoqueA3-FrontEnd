@@ -146,7 +146,7 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
 
     private void JBRelatorioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBRelatorioActionPerformed
         // TODO add your handling code here:
-       new FrmRelatorio(servicoProduto).setVisible(true);
+       new FrmRelatorio(servicoMovimentacao, servicoProduto).setVisible(true);
     }//GEN-LAST:event_JBRelatorioActionPerformed
 
     private void JBSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBSairActionPerformed

@@ -3,40 +3,24 @@ package visao;
 import servico.ServicoCategoria;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import java.sql.SQLException;
 import java.rmi.Naming;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static javax.swing.JOptionPane.showMessageDialog;
 import modelo.Categoria;
 import modelo.Tamanho;
 
 public class FrmCadastroCategoria extends javax.swing.JFrame {
 
-    private ServicoCategoria servicoCategoria;
+    private final ServicoCategoria servicoCategoria;
     private Categoria categoria = new Categoria();
 
-    public FrmCadastroCategoria() {
-        try {
-            initComponents();
-            setLocationRelativeTo(null);
-            conectarServico();
-            carregarCategorias();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,
-                    "Erro ao iniciar formulário: " + e.getMessage());
-        }
-    }
-
-    FrmCadastroCategoria(ServicoCategoria servicoCategoria) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    private void conectarServico() throws Exception {
-        servicoCategoria = (ServicoCategoria) Naming.lookup(
-                "rmi://localhost:1099/CategoriaService"
-        );
-        System.out.println("Conectado ao serviço de Categoria via RMI.");
+    public FrmCadastroCategoria(ServicoCategoria servicoCategoria) {
+        this.servicoCategoria = servicoCategoria;
+        initComponents();
+        setLocationRelativeTo(null);
+        carregarCategorias();
     }
 
     @SuppressWarnings("unchecked")
@@ -280,10 +264,9 @@ public class FrmCadastroCategoria extends javax.swing.JFrame {
 
             categoria = new Categoria(nome, tamanho, embalagem);
 
-            int idGerado = servicoCategoria.salvarCategoria(categoria);
+            servicoCategoria.salvarCategoria(categoria);
 
-            DefaultTableModel model = (DefaultTableModel) JTCategoria.getModel();
-            model.addRow(new Object[]{idGerado, nome, tamanho, embalagem});
+            carregarCategorias();
 
             JTFNome.setText("");
             JTFEmbalagem.setText("");
@@ -311,8 +294,7 @@ public class FrmCadastroCategoria extends javax.swing.JFrame {
 
         try {
             servicoCategoria.excluirCategoria(idCategoria);
-
-            model.removeRow(selectedRow);
+            carregarCategorias();
 
             JOptionPane.showMessageDialog(null, "Categoria apagada.");
 
@@ -347,36 +329,6 @@ public class FrmCadastroCategoria extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Erro ao carregar categorias: " + e.getMessage());
         }
     }
-
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FrmCadastroCategoria.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FrmCadastroCategoria.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FrmCadastroCategoria.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FrmCadastroCategoria.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-         java.awt.EventQueue.invokeLater(() -> {
-        new FrmCadastroCategoria().setVisible(true);
-    });
-}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton JBAdicionar;

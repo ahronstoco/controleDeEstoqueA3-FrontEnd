@@ -31,11 +31,11 @@ public interface ServicoProduto extends Remote {
 
     List<Produto> listarExcessoProdutos() throws RemoteException;
 
-    List<String[]> listarPorCategoria() throws RemoteException;
+    List<String[]> listarProdutosPorCategoria() throws RemoteException;
 
-    public void aplicarDesconto(int idProduto, double percentual);
+    public void aplicarDesconto(Integer idProduto, double percentual) throws RemoteException;
 
-    public void atualizarEstoque(int idProduto, int novaQuantidade);
+    public void atualizarEstoque(Integer idProduto, int novaQuantidade) throws RemoteException;
 
-    public List<Produto> buscarProdutoPorNome(String nome);
+    public List<Produto> buscarProdutoPorNome(String nome) throws RemoteException;
 }
