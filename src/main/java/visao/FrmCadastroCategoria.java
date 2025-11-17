@@ -11,11 +11,18 @@ import static javax.swing.JOptionPane.showMessageDialog;
 import modelo.Categoria;
 import modelo.Tamanho;
 
+// Tela responsável pelo cadastro, listagem e remoção de categorias.
+// Permite adicionar novas categorias com nome, tamanho (enum) e tipo de embalagem.
+// Além de exibir todas as categorias cadastradas em uma JTable.
+// A comunicação com o back-end ocorre via RMI, utilizando a interface servico.ServicoCategoria.
 public class FrmCadastroCategoria extends javax.swing.JFrame {
 
+    // Serviço RMI responsável pelas operações de categoria: salvar, excluir e listar.
     private final ServicoCategoria servicoCategoria;
+    // Objeto de categoria atualmente em edição/cadastro.
     private Categoria categoria = new Categoria();
 
+    // Construtor da tela de cadastro de categorias.
     public FrmCadastroCategoria(ServicoCategoria servicoCategoria) {
         this.servicoCategoria = servicoCategoria;
         initComponents();
@@ -225,19 +232,22 @@ public class FrmCadastroCategoria extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
-        // TODO add your handling code here:
+        // Botão responsável por fechar a tela.
         this.dispose();
     }//GEN-LAST:event_JBFecharActionPerformed
 
     private void JCTamanhoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JCTamanhoActionPerformed
-        // TODO add your handling code here:
+        // Evento relacionado ao combo de tamanho.
     }//GEN-LAST:event_JCTamanhoActionPerformed
 
     private void JTFNomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFNomeActionPerformed
-
+        // Evento do campo de nome da categoria.
     }//GEN-LAST:event_JTFNomeActionPerformed
 
     private void JBAdicionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBAdicionarActionPerformed
+        // Ação do botão "Adicionar".
+        // Valida os campos preenchidos, cria uma nova categoria e envia ao back-end para persistência via RMI.
+        // Ao final, atualiza a tabela e limpa o formulário.
         try {
             String nome = "";
             String embalagem = "";
@@ -282,6 +292,9 @@ public class FrmCadastroCategoria extends javax.swing.JFrame {
     }//GEN-LAST:event_JBAdicionarActionPerformed
 
     private void JBRemoverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBRemoverActionPerformed
+        // Ação do botão "Remover".
+        // Obtém o ID da categoria selecionada na tabela e envia ao back-end para remoção.
+        // Após a exclusão, atualiza a listagem.
         int selectedRow = JTCategoria.getSelectedRow();
 
         if (selectedRow == -1) {
@@ -304,11 +317,11 @@ public class FrmCadastroCategoria extends javax.swing.JFrame {
     }//GEN-LAST:event_JBRemoverActionPerformed
 
     private void JTFEmbalagemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFEmbalagemActionPerformed
-        // TODO add your handling code here:
-
+        // Ação do campo de embalagem.
+        // Ao pressionar ENTER dentro do campo, aciona automaticamente o botão de adicionar.
         JBAdicionar.doClick();
-
     }//GEN-LAST:event_JTFEmbalagemActionPerformed
+    // Carrega todas as categorias cadastradas no back-end e popula a JTable da interface.
     private void carregarCategorias() {
         try {
             DefaultTableModel model = (DefaultTableModel) JTCategoria.getModel();

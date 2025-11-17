@@ -5,12 +5,25 @@ import servico.ServicoProduto;
 import servico.ServicoCategoria;
 import servico.ServicoMovimentacao;
 
+// Tela principal do sistema, responsável por centralizar o acesso às demais funcionalidades da aplicação.
+// A interface permite navegar para os módulos de:
+// Cadastro de Categorias;
+// Cadastro de Produtos;
+// Gerenciamento de Estoque;
+// Relatórios;
+// Esta tela recebe as instâncias dos serviços remotos via RMI servico.ServicoProduto, servico.ServicoCategoria e
+//servico.ServicoMovimentacao e as repassa para os demais frames quando o usuário acessa cada módulo, garantindo que toda a
+//aplicação compartilhe a mesma conexão remota.
 public class FrmMenuPrincipal extends javax.swing.JFrame {
 
+    // Serviço remoto responsável por operações relacionadas a produtos, como cadastro, estoque e consultas.
     private ServicoProduto servicoProduto;
+    // Serviço remoto responsável pela gestão das categorias.
     private ServicoCategoria servicoCategoria;
+    // Serviço remoto responsável por registrar e consultar movimentações.
     private ServicoMovimentacao servicoMovimentacao;
 
+    // Construtor do menu principal.
     public FrmMenuPrincipal(ServicoProduto servicoProduto,
             ServicoCategoria servicoCategoria,
             ServicoMovimentacao servicoMovimentacao) {
@@ -39,7 +52,7 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
         JBCadastroCategoria.setBackground(new java.awt.Color(204, 204, 204));
         JBCadastroCategoria.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         JBCadastroCategoria.setForeground(new java.awt.Color(51, 51, 51));
-        JBCadastroCategoria.setText("Cadastrar Categoria");
+        JBCadastroCategoria.setText("Cadastro de Categorias");
         JBCadastroCategoria.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JBCadastroCategoriaActionPerformed(evt);
@@ -49,7 +62,7 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
         JBCadastroProduto.setBackground(new java.awt.Color(204, 204, 204));
         JBCadastroProduto.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         JBCadastroProduto.setForeground(new java.awt.Color(51, 51, 51));
-        JBCadastroProduto.setText("Cadastrar Produto");
+        JBCadastroProduto.setText("Cadastro de Produtos");
         JBCadastroProduto.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JBCadastroProdutoActionPerformed(evt);
@@ -59,7 +72,7 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
         JBGerenciaEstoque.setBackground(new java.awt.Color(204, 204, 204));
         JBGerenciaEstoque.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         JBGerenciaEstoque.setForeground(new java.awt.Color(51, 51, 51));
-        JBGerenciaEstoque.setText("Gerenciar Estoque");
+        JBGerenciaEstoque.setText("Gerenciamento de estoque");
         JBGerenciaEstoque.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 JBGerenciaEstoqueActionPerformed(evt);
@@ -95,23 +108,22 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(JBSair))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(120, 120, 120)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(JBCadastroProduto, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(JBCadastroCategoria, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(JBGerenciaEstoque, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(JBRelatorio, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(120, 120, 120)))
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(JBSair)
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addGap(50, 50, 50)
                 .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(39, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(100, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(JBGerenciaEstoque, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(JBRelatorio, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(JBCadastroProduto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(JBCadastroCategoria, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)))
+                .addGap(100, 100, 100))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -135,28 +147,29 @@ public class FrmMenuPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JBCadastroCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBCadastroCategoriaActionPerformed
-        // TODO add your handling code here:
-       new FrmCadastroCategoria(servicoCategoria).setVisible(true);
+        // Abre a tela de cadastro de categorias.
+        new FrmCadastroCategoria(servicoCategoria).setVisible(true);
     }//GEN-LAST:event_JBCadastroCategoriaActionPerformed
 
     private void JBCadastroProdutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBCadastroProdutoActionPerformed
-        // TODO add your handling code here:
-       new FrmCadastroProduto(servicoProduto, servicoCategoria).setVisible(true);
+        // Abre a tela de cadastro de produtos.
+        new FrmCadastroProduto(servicoProduto, servicoCategoria).setVisible(true);
     }//GEN-LAST:event_JBCadastroProdutoActionPerformed
 
     private void JBRelatorioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBRelatorioActionPerformed
-        // TODO add your handling code here:
-       new FrmRelatorio(servicoMovimentacao, servicoProduto).setVisible(true);
+        // Abre a tela de relatórios do sistema.
+        new FrmRelatorio(servicoMovimentacao, servicoProduto).setVisible(true);
     }//GEN-LAST:event_JBRelatorioActionPerformed
 
     private void JBSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBSairActionPerformed
-        // TODO add your handling code here:
+        // Encerra completamente a aplicação.
         System.exit(0);
     }//GEN-LAST:event_JBSairActionPerformed
 
     private void JBGerenciaEstoqueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBGerenciaEstoqueActionPerformed
-        // TODO add your handling code here:
-      new FrmGerenciaEstoque(servicoMovimentacao, servicoProduto).setVisible(true);
+        // Abre a tela de gerenciamento de estoque.
+        // Esta tela permite aplicar aumentos e reduções de preço, realizar entradas e saídas e consultar estoque detalhado.
+        new FrmGerenciaEstoque(servicoMovimentacao, servicoProduto).setVisible(true);
     }//GEN-LAST:event_JBGerenciaEstoqueActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

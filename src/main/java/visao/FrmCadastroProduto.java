@@ -12,12 +12,20 @@ import modelo.Categoria;
 import servico.ServicoCategoria;
 import servico.ServicoProduto;
 
+// Tela responsável pelo cadastro, listagem e remoção de produtos.
+// Esta interface permite ao usuário registrar produtos com nome, unidade, quantidade em estoque,
+//limites mínimo e máximo, preço unitário e categoria.
+// A comunicação com o back-end ocorre via RMI através dos serviços servico.ServicoProduto e servico.ServicoCategoria.
 public class FrmCadastroProduto extends javax.swing.JFrame {
 
+    // Serviço remoto de produtos utilizado para operações de cadastro, consulta e exclusão.
     private final ServicoProduto servicoProduto;
+    // Serviço remoto de categorias utilizado para listar categorias e associá-las aos produtos
     private final ServicoCategoria servicoCategoria;
+    // ComboBox que exibe as categorias disponíveis.
     private JComboBox<Categoria> JCCategoria;
 
+    // Construtor da tela de cadastro de produtos.
     public FrmCadastroProduto(ServicoProduto servicoProduto, ServicoCategoria servicoCategoria) {
         initComponents();
         setLocationRelativeTo(null);
@@ -30,6 +38,7 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
         carregarProdutos();
     }
 
+    // Configura o JComboBox de categorias, definindo posição, aparência e fonte, além de adicioná-lo manualmente ao frame.
     private void configurarCategoriaCombo() {
         JCCategoria = new JComboBox<>();
         JCCategoria.setBounds(600, 57, 150, 20); // ajuste as coordenadas
@@ -39,6 +48,7 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
         getContentPane().add(JCCategoria);
     }
 
+    // Carrega todas as categorias cadastradas no sistema via RMI e insere no JComboBox de seleção de categoria.
     private void carregarCategorias() {
         try {
             JCCategoria.removeAllItems();
@@ -52,6 +62,7 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
         }
     }
 
+    // Carrega todos os produtos cadastrados via serviço remoto e popula a tabela da interface gráfica
     private void carregarProdutos() {
         try {
             DefaultTableModel model = (DefaultTableModel) JTProduto.getModel();
@@ -296,16 +307,16 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
-        // TODO add your handling code here:
+        // Fecha a tela atual.
         this.dispose();
     }//GEN-LAST:event_JBFecharActionPerformed
 
     private void JTFNomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFNomeActionPerformed
-        // TODO add your handling code here:
+        // Evento de ação do campo de nome.
     }//GEN-LAST:event_JTFNomeActionPerformed
 
     private void JBRemoverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBRemoverActionPerformed
-        // TODO add your handling code here:
+        // Remove o produto selecionado na tabela e solicita ao back-end a remoção via RMI.
         int row = JTProduto.getSelectedRow();
 
         if (row == -1) {
@@ -318,23 +329,24 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
         try {
             servicoProduto.excluirProduto(idProduto);
             carregarProdutos();
-            JOptionPane.showMessageDialog(this, "Produto removido com sucesso!");
+            JOptionPane.showMessageDialog(this, "Produto removido.");
         } catch (RemoteException e) {
             JOptionPane.showMessageDialog(this, "Erro ao excluir produto (RMI): " + e.getMessage());
         }
     }//GEN-LAST:event_JBRemoverActionPerformed
 
     private void JTFQuantidadeMinimaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFQuantidadeMinimaActionPerformed
-        // TODO add your handling code here:
+        // Evento do campo de quantidade mínima
     }//GEN-LAST:event_JTFQuantidadeMinimaActionPerformed
 
     private void JTFQuantidadeMaximaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFQuantidadeMaximaActionPerformed
-        // TODO add your handling code here:
+        // Evento do campo de quantidade máxima.
     }//GEN-LAST:event_JTFQuantidadeMaximaActionPerformed
 
     private void JBAdicionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBAdicionarActionPerformed
-        // TODO add your handling code here:
-         try {
+        // Cadastra um novo produto após validar os campos preenchidos, converte entradas numéricas e envia ao back-end via RMI.
+        // Em caso de sucesso, atualiza a listagem e limpa o formulário.
+        try {
 
             if (JTFNome.getText().trim().isEmpty()) {
                 throw new Exception("O nome não pode estar vazio.");
@@ -357,7 +369,7 @@ public class FrmCadastroProduto extends javax.swing.JFrame {
 
             servicoProduto.salvarProduto(produto);
 
-            JOptionPane.showMessageDialog(this, "Produto cadastrado com sucesso.");
+            JOptionPane.showMessageDialog(this, "Produto cadastrado.");
             carregarProdutos();
 
         } catch (NumberFormatException e) {

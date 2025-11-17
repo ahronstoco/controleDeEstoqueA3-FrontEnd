@@ -11,11 +11,25 @@ import modelo.Produto;
 import servico.ServicoProduto;
 import servico.ServicoMovimentacao;
 
+// Tela responsável pela exibição dos diferentes relatórios do sistema.
+// Através desta interface, o usuário pode gerar relatórios dinâmicos, baseados nos dados do estoque e das movimentações.
+// Os relatórios disponíveis incluem:
+// Lista de preços: Exibe nome, preço, unidade e categoria.
+// Balanço físico: Mostra quantidade em estoque, preço e total monetário de cada item.
+// Produtos abaixo do mínimo: Lista itens que estão abaixo da quantidade mínima.
+// Produtos acima do máximo: Lista itens que ultrapassam a quantidade máxima.
+// Produtos por categoria: Exibe quantos itens existem em cada categoria.
+// Relatório de movimentações: Mostra entradas, saídas, ajustes e alterações de preço.
+// Esta tela utiliza os serviços remotos ServicoProduto e ServicoMovimentacao via RMI para carregar os dados e
+//preencher a tabela de resultados de forma dinâmica.
 public class FrmRelatorio extends javax.swing.JFrame {
 
+    // Serviço remoto responsável por operações relacionadas a produtos, como consultas e relatórios de estoque.
     private final ServicoProduto servicoProduto;
+    // Serviço remoto responsável pelo registro e consulta de movimentações.
     private final ServicoMovimentacao servicoMovimentacao;
 
+    // Construtor da tela de relatórios.
     public FrmRelatorio(ServicoMovimentacao servicoMovimentacao, ServicoProduto servicoProduto) {
         initComponents();
         setLocationRelativeTo(null);
@@ -194,33 +208,41 @@ public class FrmRelatorio extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
-        // TODO add your handling code here:
+        // Fecha a tela atual.
         this.dispose();
     }//GEN-LAST:event_JBFecharActionPerformed
 
     private void JBListaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBListaActionPerformed
+        // Gera o relatório de lista de preços.
         gerarListaPrecos();
     }//GEN-LAST:event_JBListaActionPerformed
 
     private void JBBalancoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBBalancoActionPerformed
+        // Gera o relatório de balanço físico.
         gerarBalanco();
     }//GEN-LAST:event_JBBalancoActionPerformed
 
     private void JBExcessoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBExcessoActionPerformed
+        // Gera o relatório de produtos acima do máximo.
         gerarExcessoProdutos();
     }//GEN-LAST:event_JBExcessoActionPerformed
 
     private void JBCategoriaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBCategoriaActionPerformed
+        // Gera o relatório de produtos por categoria.
         gerarPorCategoria();
     }//GEN-LAST:event_JBCategoriaActionPerformed
 
     private void JBFaltaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFaltaActionPerformed
+        // Gera o relatório de produtos abaixo do mínimo.
         gerarFaltaProdutos();
     }//GEN-LAST:event_JBFaltaActionPerformed
 
     private void JBMovimentacoesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBMovimentacoesActionPerformed
+        // Gera o relatório de movimentações (entradas, saídas, ajustes).
         gerarMovimentacoes();
     }//GEN-LAST:event_JBMovimentacoesActionPerformed
+
+    // Gera a lista de preços contendo nome, preço unitário, unidade e categoria.
     private void gerarListaPrecos() {
         try {
             List<Produto> lista = servicoProduto.listarProdutos();
@@ -245,6 +267,8 @@ public class FrmRelatorio extends javax.swing.JFrame {
         }
     }
 
+    // Gera o balanço físico, mostrando quantidade, preço e total por item.
+    // Também calcula e exibe o valor total do estoque.
     private void gerarBalanco() {
         try {
             List<Produto> lista = servicoProduto.listarProdutos();
@@ -276,6 +300,7 @@ public class FrmRelatorio extends javax.swing.JFrame {
         }
     }
 
+    // Gera o relatório de produtos abaixo da quantidade mínima.
     private void gerarFaltaProdutos() {
         try {
             List<Produto> lista = servicoProduto.listarProdutosAbaixoDoMinimo();
@@ -299,6 +324,7 @@ public class FrmRelatorio extends javax.swing.JFrame {
         }
     }
 
+    // Gera o relatório de produtos acima da quantidade máxima.
     private void gerarExcessoProdutos() {
         try {
             List<Produto> lista = servicoProduto.listarProdutosAcimaDoMaximo();
@@ -322,6 +348,7 @@ public class FrmRelatorio extends javax.swing.JFrame {
         }
     }
 
+    // Gera relatório de contagem de produtos por categoria.
     private void gerarPorCategoria() {
         try {
             List<String[]> lista = servicoProduto.listarProdutosPorCategoria();
@@ -341,6 +368,8 @@ public class FrmRelatorio extends javax.swing.JFrame {
         }
     }
 
+    // Gera o relatório completo de movimentações de estoque.
+    // Exibe entradas, saídas, ajustes e alterações de preço.
     private void gerarMovimentacoes() {
         try {
             String[] colunas = {

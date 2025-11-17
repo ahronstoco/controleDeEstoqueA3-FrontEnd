@@ -9,11 +9,18 @@ import modelo.Produto;
 import servico.ServicoMovimentacao;
 import servico.ServicoProduto;
 
+// Tela de gerenciamento de estoque do sistema.
+// Permite ao usuário visualizar produtos cadastrados, aplicar aumento ou redução
+//de preços, realizar operações de entrada e saída de estoque, pesquisar produtos e registrar movimentações.
+// A comunicação com o back-end ocorre via RMI através dos serviços servico.ServicoProduto e servico.ServicoMovimentacao.
 public class FrmGerenciaEstoque extends javax.swing.JFrame {
 
+    // Serviço remoto responsável pela manipulação de produtos (estoque, preço, listagem, exclusões e consultas).
     private final ServicoProduto servicoProduto;
+    // Serviço remoto responsável pelo registro e listagem de movimentações.
     private final ServicoMovimentacao servicoMovimentacao;
 
+    // Construtor da tela de gerenciamento de estoque.
     public FrmGerenciaEstoque(ServicoMovimentacao servicoMovimentacao, ServicoProduto servicoProduto) {
         initComponents();
         setLocationRelativeTo(null);
@@ -274,10 +281,15 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void JBFecharActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBFecharActionPerformed
+        // Fecha a tela atual.
         this.dispose();
     }//GEN-LAST:event_JBFecharActionPerformed
 
     private void JBAplicarAumentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBAplicarAumentoActionPerformed
+        // Aplica aumento de preço ao produto selecionado.
+        // O aumento é calculado como percentual positivo. Internamente, utiliza o
+        //método do back-end aplicarDesconto, enviando um valor negativo para representar aumento.
+        // Após a operação, uma movimentação de tipo entrada é registrada para controle histórico.
         int selectedRow = JTEstoque.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Selecione um produto.");
@@ -293,7 +305,7 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
             registrarMov(idProduto, "entrada", 0,
                     "AUMENTO DE: +" + (percentual * 100) + "%");
 
-            JOptionPane.showMessageDialog(this, "Preço aumentado com sucesso.");
+            JOptionPane.showMessageDialog(this, "Preço aumentado.");
             carregarProdutos();
             JTFAumentoPreco.setText("");
 
@@ -304,22 +316,24 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
     }//GEN-LAST:event_JBAplicarAumentoActionPerformed
 
     private void JTFQuantidadeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFQuantidadeActionPerformed
-        // TODO add your handling code here:
+        // Evento padrão do campo de quantidade.
     }//GEN-LAST:event_JTFQuantidadeActionPerformed
 
     private void JCOperacaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JCOperacaoActionPerformed
-        // TODO add your handling code here:
+        // Evento padrão da combo de operação (Entrada/Saída).
     }//GEN-LAST:event_JCOperacaoActionPerformed
 
     private void JTFAumentoPrecoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFAumentoPrecoActionPerformed
-        // TODO add your handling code here:
+        // Evento padrão do campo de aumento de preço.
     }//GEN-LAST:event_JTFAumentoPrecoActionPerformed
 
     private void JTFReducaoPrecoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFReducaoPrecoActionPerformed
-        // TODO add your handling code here:
+        // Evento padrão do campo de redução de preço.
     }//GEN-LAST:event_JTFReducaoPrecoActionPerformed
 
     private void JBPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBPesquisarActionPerformed
+        // Realiza busca de produto com base no texto digitado.
+        // Caso seja número, busca por ID; caso contrário, busca por nome.
         String texto = JTFPesquisar.getText().trim();
 
         if (texto.matches("\\d+")) {
@@ -330,6 +344,7 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
     }//GEN-LAST:event_JBPesquisarActionPerformed
 
     private void JBAplicarReducaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBAplicarReducaoActionPerformed
+        // Aplica redução de preço ao produto selecionado.
         int selectedRow = JTEstoque.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Selecione um produto.");
@@ -345,7 +360,7 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
             registrarMov(idProduto, "saida", 0,
                     "REDUÇÃO DE: -" + (percentual * 100) + "%");
 
-            JOptionPane.showMessageDialog(this, "Desconto aplicado com sucesso.");
+            JOptionPane.showMessageDialog(this, "Desconto aplicado.");
             carregarProdutos();
             JTFReducaoPreco.setText("");
 
@@ -356,6 +371,9 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
     }//GEN-LAST:event_JBAplicarReducaoActionPerformed
 
     private void JBAlterarQuantidadeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JBAlterarQuantidadeActionPerformed
+        // Realiza entrada ou saída de estoque para o produto selecionado,
+        //atualizando sua quantidade e registrando movimentação correspondente.
+        // Também exibe alertas caso o estoque resultante esteja abaixo da mínima ou acima da máxima configurada.
         int selectedRow = JTEstoque.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Selecione um produto.");
@@ -416,8 +434,11 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
     }//GEN-LAST:event_JBAlterarQuantidadeActionPerformed
 
     private void JTFPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JTFPesquisarActionPerformed
+        // Ação do campo de pesquisa: executa a busca imediatamente.
         JBPesquisar.doClick();
     }//GEN-LAST:event_JTFPesquisarActionPerformed
+
+    //  Carrega todos os produtos via serviço remoto e popula a tabela de estoque.
     private void carregarProdutos() {
         try {
             DefaultTableModel model = (DefaultTableModel) JTEstoque.getModel();
@@ -444,6 +465,7 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
         }
     }
 
+    // Busca um produto pelo ID informado e atualiza a tabela exibindo apenas o resultado encontrado.
     private void buscarPorId(int idProduto) {
         try {
             Produto p = servicoProduto.buscarProdutoPorId(idProduto);
@@ -470,6 +492,7 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
         }
     }
 
+    // Busca produtos cujo nome contenha o texto informado.
     private void buscarPorNome(String nome) {
         try {
             List<Produto> lista = servicoProduto.buscarProdutoPorNome(nome);
@@ -494,6 +517,7 @@ public class FrmGerenciaEstoque extends javax.swing.JFrame {
         }
     }
 
+    // Registra uma movimentação de estoque ou de preço no back-end.
     private void registrarMov(int idProduto, String tipo, int quantidade, String obs) {
         try {
             servicoMovimentacao.registrarMovimentacao(
