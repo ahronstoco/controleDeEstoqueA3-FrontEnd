@@ -2,7 +2,10 @@
 **Disciplina: Sistemas Distribuídos e Mobile – A3**
 
 Este repositório contém a camada **front-end** do sistema de controle de estoque.
+
 **Link para o front-end:** https://github.com/ahronstoco/controleDeEstoqueA3-BackEnd
+
+- [`Documentação do projeto`](Controle%20de%20Estoque%20A3%20-%20Sistemas%20Distribuídos.pdf)
 
 ---
 
